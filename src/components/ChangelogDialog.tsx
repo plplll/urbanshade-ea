@@ -43,8 +43,8 @@ export const ChangelogDialog = () => {
       "Made it actually do stuff :fire:"
     ],
     "FACILITY PLANNER (This took too long): [
-      "Its actually usable by a human",
-      "You can actually do stuff with it now"
+      "This thing is breaking so i cant write here",
+      "Smth Smth update should be visible on Git"
     ],
     "Installer": [
       "Its actually somewhat an installer",
