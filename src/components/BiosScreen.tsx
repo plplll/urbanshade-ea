@@ -5,11 +5,9 @@ interface BiosScreenProps {
 }
 
 export const BiosScreen = ({ onExit }: BiosScreenProps) => {
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedTab, setSelectedTab] = useState<"main" | "boot" | "advanced" | "security" | "exit">("main");
   const [selectedOption, setSelectedOption] = useState(0);
-  const [exitCountdown, setExitCountdown] = useState<number | null>(null);
-  const [showingExit, setShowingExit] = useState(false);
-  const oemUnlocked = localStorage.getItem('settings_oem_unlock') === 'true';
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

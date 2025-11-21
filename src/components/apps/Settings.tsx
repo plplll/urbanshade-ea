@@ -12,7 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { saveState, loadState } from "@/lib/persistence";
 import { toast } from "sonner";
 
-export const Settings = () => {
+export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   const [selectedCategory, setSelectedCategory] = useState("system");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
@@ -262,9 +262,17 @@ export const Settings = () => {
                   </div>
                   <Switch checked={telemetry} onCheckedChange={(checked) => { setTelemetry(checked); handleSave("settings_telemetry", checked); }} />
                 </div>
-                <Button className="w-full">Check for updates</Button>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    toast.success("Update available! Installing v2.0.0");
+                    setTimeout(() => onUpdate?.(), 2000);
+                  }}
+                >
+                  Check for updates
+                </Button>
                 <div className="text-sm text-muted-foreground">
-                  Last checked: Today at 3:47 PM
+                  Last checked: Just now
                 </div>
               </div>
             </Card>
@@ -1219,7 +1227,7 @@ export const Settings = () => {
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="text-2xl font-bold mb-4">About Urbanshade OS</h2>
-              <p className="text-muted-foreground mb-6">System information and credits</p>
+              <p className="text-muted-foreground mb-6">Information about your system</p>
             </div>
 
             <Card className="p-6">
@@ -1244,7 +1252,7 @@ export const Settings = () => {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t space-y-2">
+                <div className="pt-4 border-t">
                   <Button 
                     variant="outline" 
                     className="w-full justify-start"
@@ -1253,47 +1261,36 @@ export const Settings = () => {
                     <Globe className="w-4 h-4 mr-2" />
                     Visit GitHub Repository
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => {
-                      localStorage.removeItem("urbanshade_last_seen_version");
-                      window.location.reload();
-                    }}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    View Changelog
-                  </Button>
                 </div>
 
                 <div>
                   <h4 className="font-semibold mb-3">Contributors</h4>
                   <div className="space-y-2">
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                        AB
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">Aswdbatch</p>
-                        <p className="text-sm text-muted-foreground">Lead Developer & Project Creator</p>
+                      <div>
+                        <p className="font-medium">Lead Developer</p>
+                        <p className="text-sm text-muted-foreground">Main contributor</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                        AI
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">Lovable AI</p>
-                        <p className="text-sm text-muted-foreground">Code generation & implementation assistance</p>
+                      <div>
+                        <p className="font-medium">UI/UX Designer</p>
+                        <p className="text-sm text-muted-foreground">Interface design</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in" style={{ animationDelay: '0.2s' }}>
                       <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                         <Users className="w-5 h-5 text-primary" />
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">Community Contributors</p>
-                        <p className="text-sm text-muted-foreground">Bug reports, testing & feedback</p>
+                      <div>
+                        <p className="font-medium">Quality Assurance</p>
+                        <p className="text-sm text-muted-foreground">Testing & bug fixes</p>
                       </div>
                     </div>
                   </div>
@@ -1308,7 +1305,17 @@ export const Settings = () => {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t space-y-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      localStorage.removeItem("urbanshade_last_seen_version");
+                      window.location.reload();
+                    }}
+                  >
+                    View Changelog
+                  </Button>
                   <Button variant="outline" className="w-full">
                     View Open Source Licenses
                   </Button>
