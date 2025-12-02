@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Terminal as TerminalIcon } from "lucide-react";
+import { HIDDEN_COMMANDS, checkTimeBasedEvent, discoverEasterEgg } from "@/lib/easterEggs";
 
 interface CommandHistory {
   input: string;
@@ -15,12 +16,30 @@ export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   const [history, setHistory] = useState<CommandHistory[]>([
     { input: "", output: "URBANSHADE SECURE TERMINAL v3.2.1\nType 'help' for available commands.\n" }
   ]);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [history]);
+
+  // Check for time-based events on mount
+  useEffect(() => {
+    const timeEvent = checkTimeBasedEvent();
+    if (timeEvent) {
+      setHistory(prev => [...prev, { input: "", output: timeEvent }]);
+    }
+  }, []);
+
+  // Load plugin commands and add to command list
+  const pluginCommands = JSON.parse(localStorage.getItem('plugin_commands') || '[]');
+  
+  // Add plugin commands to help text dynamically
+  const pluginCommandsText = pluginCommands.length > 0
+    ? `\n\n  [PLUGIN COMMANDS]\n${pluginCommands.map((cmd: any) => `  ${cmd.name.padEnd(14)} - ${cmd.description}`).join('\n')}`
+    : '';
 
   const commands: Record<string, string> = {
   help: `Available commands:
@@ -57,7 +76,7 @@ export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   echo          - Echo text
   history       - Show command history
   depth         - Facility depth info
-  reality       - Reality check
+  reality       - Reality check${pluginCommandsText}
   
   [HIDDEN COMMANDS]
   admin         - Administrator menu (Level 5)
@@ -569,10 +588,23 @@ Use for testing purposes only.`
       }
     } else if (commands[cmd]) {
       output = commands[cmd];
+    } else if (HIDDEN_COMMANDS[cmd]) {
+      // Easter egg command found!
+      output = HIDDEN_COMMANDS[cmd].response;
+      discoverEasterEgg(`cmd_${cmd.replace(/\s+/g, '_')}`);
     } else {
-      output = `Command not found: ${cmd}\nType 'help' for available commands.`;
+      // Check plugin commands
+      const pluginCmd = pluginCommands.find((pc: any) => pc.name === cmd);
+      if (pluginCmd) {
+        output = `━━━━━━━━━━━━━━━━━━━━━━━━━━\n${pluginCmd.name.toUpperCase()} (Plugin Command)\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${pluginCmd.description}\n\nPlugin ID: ${pluginCmd.id}\n\nThis is a simulated plugin command.\nFull functionality coming soon!`;
+      } else {
+        output = `Command not found: ${cmd}\nType 'help' for available commands.`;
+      }
     }
 
+    // Save to command history for up/down navigation
+    setCommandHistory(prev => [...prev, cmd]);
+    setHistoryIndex(-1);
     setHistory(prev => [...prev, { input: cmd, output }]);
     setInput("");
   };
@@ -615,6 +647,19 @@ Use for testing purposes only.`
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowUp" && commandHistory.length > 0) {
+                e.preventDefault();
+                const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
+                setHistoryIndex(newIndex);
+                setInput(commandHistory[commandHistory.length - 1 - newIndex] || "");
+              } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                const newIndex = historyIndex > 0 ? historyIndex - 1 : -1;
+                setHistoryIndex(newIndex);
+                setInput(newIndex >= 0 ? commandHistory[commandHistory.length - 1 - newIndex] : "");
+              }
+            }}
             className="flex-1 bg-transparent outline-none text-primary"
             autoFocus
             spellCheck={false}
